@@ -17,36 +17,36 @@ const browserConfig = {
         options: {
           name: "public/media/[name].[ext]",
           publicPath: url => url.replace(/public/, "")
+        }
+      },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          use: [
+            {
+              loader: "css-loader",
+              options: { importLoaders: 1 }
+            },
+            {
+              loader: "postcss-loader",
+              options: { plugins: [autoprefixer()] }
+            }
+          ]
+        })
+      },
+      {
+        test: /js$/,
+        exclude: /(node_modules)/,
+        loader: "babel-loader",
+        query: { presets: ["react-app"] }
       }
+    ]
   },
-{
-  test: /\.css$/,
-    use: ExtractTextPlugin.extract({
-  use: [
-    {
-      loader: "css-loader",
-      options: { importLoaders: 1 }
-    },
-    {
-      loader: "postcss-loader",
-      options: { plugins: [autoprefixer()] }
-    }
+  plugins: [
+    new ExtractTextPlugin({
+      filename: "public/css/[name].css"
+    })
   ]
-})
-},
-{
-  test: /js$/,
-    exclude: /(node_modules)/,
-  loader: "babel-loader",
-  query: { presets: ["react-app"] }
-}
-]
-},
-plugins: [
-  new ExtractTextPlugin({
-    filename: "public/css/[name].css"
-  })
-]
 };
 
 const serverConfig = {
@@ -66,25 +66,25 @@ const serverConfig = {
         options: {
           name: "public/media/[name].[ext]",
           publicPath: url => url.replace(/public/, ""),
-        emit: false
+          emit: false
+        }
+      },
+      {
+        test: /\.css$/,
+        use: [
+          {
+            loader: "css-loader/locals"
+          }
+        ]
+      },
+      {
+        test: /js$/,
+        exclude: /(node_modules)/,
+        loader: "babel-loader",
+        query: { presets: ["react-app"] }
       }
-  },
-{
-  test: /\.css$/,
-    use: [
-  {
-    loader: "css-loader/locals"
+    ]
   }
-]
-},
-{
-  test: /js$/,
-    exclude: /(node_modules)/,
-  loader: "babel-loader",
-  query: { presets: ["react-app"] }
-}
-]
-}
 };
 
 module.exports = [browserConfig, serverConfig];
