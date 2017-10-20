@@ -1,14 +1,14 @@
-import express from "express";
-import cors from "cors";
-import React from "react";
-import { renderToString } from "react-dom/server";
-import { Provider } from "react-redux";
-import { StaticRouter, matchPath } from "react-router-dom";
-import serialize from "serialize-javascript";
-import routes from "../shared/routes";
-import configureStore from "../shared/configureStore";
-import App from "../shared/App";
-import "source-map-support/register";
+const express = require('express');
+const cors = require('cors');
+const React = require("react");
+const renderToString = require("react-dom/server");
+const Provider = require("react-redux");
+const matchPath  = require("react-router-dom");
+const StaticRouter = require("react-router-dom");
+const serialize = require( "serialize-javascript");
+const routes = require("../shared/routes");
+const App = require("../shared/App");
+require("source-map-support/register");
 
 const app = express();
 
