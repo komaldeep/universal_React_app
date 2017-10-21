@@ -1,14 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-const React = require("react");
-const renderToString = require("react-dom/server");
-const Provider = require("react-redux");
-const matchPath  = require("react-router-dom");
-const StaticRouter = require("react-router-dom");
-const serialize = require( "serialize-javascript");
-const routes = require("../shared/routes");
-const App = require("../shared/App");
-require("source-map-support/register");
+import express from "express";
+import cors from "cors";
+import React from "react";
+import { renderToString } from "react-dom/server";
+import { Provider } from "react-redux";
+import { StaticRouter, matchPath } from "react-router-dom";
+import serialize from "serialize-javascript";
+import routes from "../shared/routes";
+import configureStore from "../shared/configureStore";
+import App from "../shared/App";
+import "source-map-support/register";
 
 const app = express();
 
@@ -135,6 +135,7 @@ app.get("*", (req, res, next) => {
             <script src="/bundle.js" defer></script>
             <script>window.__initialData__ = ${serialize(initialData)}</script>
           </head>
+
           <body>
             <div id="root">${markup}</div>
           </body>
@@ -145,5 +146,5 @@ app.get("*", (req, res, next) => {
 });
 
 app.listen(process.env.PORT || 3000, () => {
-  console.log("Server is listening");
+  console.log("Server is listening 3000");
 });

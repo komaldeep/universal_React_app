@@ -11064,33 +11064,32 @@ function isPlainObject(value) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__BrowserRouter__ = __webpack_require__(361);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "BrowserRouter", function() { return __WEBPACK_IMPORTED_MODULE_0__BrowserRouter__["a"]; });
+/* unused harmony reexport BrowserRouter */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__HashRouter__ = __webpack_require__(363);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "HashRouter", function() { return __WEBPACK_IMPORTED_MODULE_1__HashRouter__["a"]; });
+/* unused harmony reexport HashRouter */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__Link__ = __webpack_require__(165);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Link", function() { return __WEBPACK_IMPORTED_MODULE_2__Link__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__Link__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__MemoryRouter__ = __webpack_require__(365);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "MemoryRouter", function() { return __WEBPACK_IMPORTED_MODULE_3__MemoryRouter__["a"]; });
+/* unused harmony reexport MemoryRouter */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__NavLink__ = __webpack_require__(368);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "NavLink", function() { return __WEBPACK_IMPORTED_MODULE_4__NavLink__["a"]; });
+/* unused harmony reexport NavLink */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__Prompt__ = __webpack_require__(371);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Prompt", function() { return __WEBPACK_IMPORTED_MODULE_5__Prompt__["a"]; });
+/* unused harmony reexport Prompt */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__Redirect__ = __webpack_require__(373);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Redirect", function() { return __WEBPACK_IMPORTED_MODULE_6__Redirect__["a"]; });
+/* unused harmony reexport Redirect */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__Route__ = __webpack_require__(166);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Route", function() { return __WEBPACK_IMPORTED_MODULE_7__Route__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_7__Route__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__Router__ = __webpack_require__(88);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Router", function() { return __WEBPACK_IMPORTED_MODULE_8__Router__["a"]; });
+/* unused harmony reexport Router */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__StaticRouter__ = __webpack_require__(379);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "StaticRouter", function() { return __WEBPACK_IMPORTED_MODULE_9__StaticRouter__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_9__StaticRouter__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_10__Switch__ = __webpack_require__(381);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Switch", function() { return __WEBPACK_IMPORTED_MODULE_10__Switch__["a"]; });
+/* unused harmony reexport Switch */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_11__matchPath__ = __webpack_require__(383);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "matchPath", function() { return __WEBPACK_IMPORTED_MODULE_11__matchPath__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "d", function() { return __WEBPACK_IMPORTED_MODULE_11__matchPath__["a"]; });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_12__withRouter__ = __webpack_require__(384);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "withRouter", function() { return __WEBPACK_IMPORTED_MODULE_12__withRouter__["a"]; });
+/* unused harmony reexport withRouter */
 
 
 
@@ -11586,8 +11585,420 @@ var createTransitionManager = function createTransitionManager() {
 /* harmony default export */ __webpack_exports__["a"] = (createTransitionManager);
 
 /***/ }),
-/* 92 */,
-/* 93 */,
+/* 92 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * body.js
+ *
+ * Body interface provides common methods for Request and Response
+ */
+
+var convert = __webpack_require__(395).convert;
+var bodyStream = __webpack_require__(398);
+var PassThrough = __webpack_require__(21).PassThrough;
+var FetchError = __webpack_require__(170);
+
+module.exports = Body;
+
+/**
+ * Body class
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+function Body(body, opts) {
+
+	opts = opts || {};
+
+	this.body = body;
+	this.bodyUsed = false;
+	this.size = opts.size || 0;
+	this.timeout = opts.timeout || 0;
+	this._raw = [];
+	this._abort = false;
+
+}
+
+/**
+ * Decode response as json
+ *
+ * @return  Promise
+ */
+Body.prototype.json = function() {
+
+	var self = this;
+
+	return this._decode().then(function(buffer) {
+		try {
+			return JSON.parse(buffer.toString());
+		} catch (err) {
+			return Body.Promise.reject(new FetchError('invalid json response body at ' + self.url + ' reason: ' + err.message, 'invalid-json'));
+		}
+	});
+
+};
+
+/**
+ * Decode response as text
+ *
+ * @return  Promise
+ */
+Body.prototype.text = function() {
+
+	return this._decode().then(function(buffer) {
+		return buffer.toString();
+	});
+
+};
+
+/**
+ * Decode response as buffer (non-spec api)
+ *
+ * @return  Promise
+ */
+Body.prototype.buffer = function() {
+
+	return this._decode();
+
+};
+
+/**
+ * Decode buffers into utf-8 string
+ *
+ * @return  Promise
+ */
+Body.prototype._decode = function() {
+
+	var self = this;
+
+	if (this.bodyUsed) {
+		return Body.Promise.reject(new Error('body used already for: ' + this.url));
+	}
+
+	this.bodyUsed = true;
+	this._bytes = 0;
+	this._abort = false;
+	this._raw = [];
+
+	return new Body.Promise(function(resolve, reject) {
+		var resTimeout;
+
+		// body is string
+		if (typeof self.body === 'string') {
+			self._bytes = self.body.length;
+			self._raw = [new Buffer(self.body)];
+			return resolve(self._convert());
+		}
+
+		// body is buffer
+		if (self.body instanceof Buffer) {
+			self._bytes = self.body.length;
+			self._raw = [self.body];
+			return resolve(self._convert());
+		}
+
+		// allow timeout on slow response body
+		if (self.timeout) {
+			resTimeout = setTimeout(function() {
+				self._abort = true;
+				reject(new FetchError('response timeout at ' + self.url + ' over limit: ' + self.timeout, 'body-timeout'));
+			}, self.timeout);
+		}
+
+		// handle stream error, such as incorrect content-encoding
+		self.body.on('error', function(err) {
+			reject(new FetchError('invalid response body at: ' + self.url + ' reason: ' + err.message, 'system', err));
+		});
+
+		// body is stream
+		self.body.on('data', function(chunk) {
+			if (self._abort || chunk === null) {
+				return;
+			}
+
+			if (self.size && self._bytes + chunk.length > self.size) {
+				self._abort = true;
+				reject(new FetchError('content size at ' + self.url + ' over limit: ' + self.size, 'max-size'));
+				return;
+			}
+
+			self._bytes += chunk.length;
+			self._raw.push(chunk);
+		});
+
+		self.body.on('end', function() {
+			if (self._abort) {
+				return;
+			}
+
+			clearTimeout(resTimeout);
+			resolve(self._convert());
+		});
+	});
+
+};
+
+/**
+ * Detect buffer encoding and convert to target encoding
+ * ref: http://www.w3.org/TR/2011/WD-html5-20110113/parsing.html#determining-the-character-encoding
+ *
+ * @param   String  encoding  Target encoding
+ * @return  String
+ */
+Body.prototype._convert = function(encoding) {
+
+	encoding = encoding || 'utf-8';
+
+	var ct = this.headers.get('content-type');
+	var charset = 'utf-8';
+	var res, str;
+
+	// header
+	if (ct) {
+		// skip encoding detection altogether if not html/xml/plain text
+		if (!/text\/html|text\/plain|\+xml|\/xml/i.test(ct)) {
+			return Buffer.concat(this._raw);
+		}
+
+		res = /charset=([^;]*)/i.exec(ct);
+	}
+
+	// no charset in content type, peek at response body for at most 1024 bytes
+	if (!res && this._raw.length > 0) {
+		for (var i = 0; i < this._raw.length; i++) {
+			str += this._raw[i].toString()
+			if (str.length > 1024) {
+				break;
+			}
+		}
+		str = str.substr(0, 1024);
+	}
+
+	// html5
+	if (!res && str) {
+		res = /<meta.+?charset=(['"])(.+?)\1/i.exec(str);
+	}
+
+	// html4
+	if (!res && str) {
+		res = /<meta[\s]+?http-equiv=(['"])content-type\1[\s]+?content=(['"])(.+?)\2/i.exec(str);
+
+		if (res) {
+			res = /charset=(.*)/i.exec(res.pop());
+		}
+	}
+
+	// xml
+	if (!res && str) {
+		res = /<\?xml.+?encoding=(['"])(.+?)\1/i.exec(str);
+	}
+
+	// found charset
+	if (res) {
+		charset = res.pop();
+
+		// prevent decode issues when sites use incorrect encoding
+		// ref: https://hsivonen.fi/encoding-menu/
+		if (charset === 'gb2312' || charset === 'gbk') {
+			charset = 'gb18030';
+		}
+	}
+
+	// turn raw buffers into a single utf-8 buffer
+	return convert(
+		Buffer.concat(this._raw)
+		, encoding
+		, charset
+	);
+
+};
+
+/**
+ * Clone body given Res/Req instance
+ *
+ * @param   Mixed  instance  Response or Request instance
+ * @return  Mixed
+ */
+Body.prototype._clone = function(instance) {
+	var p1, p2;
+	var body = instance.body;
+
+	// don't allow cloning a used body
+	if (instance.bodyUsed) {
+		throw new Error('cannot clone body after it is used');
+	}
+
+	// check that body is a stream and not form-data object
+	// note: we can't clone the form-data object without having it as a dependency
+	if (bodyStream(body) && typeof body.getBoundary !== 'function') {
+		// tee instance body
+		p1 = new PassThrough();
+		p2 = new PassThrough();
+		body.pipe(p1);
+		body.pipe(p2);
+		// set instance body to teed body and return the other teed body
+		instance.body = p1;
+		body = p2;
+	}
+
+	return body;
+}
+
+// expose Promise
+Body.Promise = global.Promise;
+
+
+/***/ }),
+/* 93 */
+/***/ (function(module, exports) {
+
+
+/**
+ * headers.js
+ *
+ * Headers class offers convenient helpers
+ */
+
+module.exports = Headers;
+
+/**
+ * Headers class
+ *
+ * @param   Object  headers  Response headers
+ * @return  Void
+ */
+function Headers(headers) {
+
+	var self = this;
+	this._headers = {};
+
+	// Headers
+	if (headers instanceof Headers) {
+		headers = headers.raw();
+	}
+
+	// plain object
+	for (var prop in headers) {
+		if (!headers.hasOwnProperty(prop)) {
+			continue;
+		}
+
+		if (typeof headers[prop] === 'string') {
+			this.set(prop, headers[prop]);
+
+		} else if (typeof headers[prop] === 'number' && !isNaN(headers[prop])) {
+			this.set(prop, headers[prop].toString());
+
+		} else if (Array.isArray(headers[prop])) {
+			headers[prop].forEach(function(item) {
+				self.append(prop, item.toString());
+			});
+		}
+	}
+
+}
+
+/**
+ * Return first header value given name
+ *
+ * @param   String  name  Header name
+ * @return  Mixed
+ */
+Headers.prototype.get = function(name) {
+	var list = this._headers[name.toLowerCase()];
+	return list ? list[0] : null;
+};
+
+/**
+ * Return all header values given name
+ *
+ * @param   String  name  Header name
+ * @return  Array
+ */
+Headers.prototype.getAll = function(name) {
+	if (!this.has(name)) {
+		return [];
+	}
+
+	return this._headers[name.toLowerCase()];
+};
+
+/**
+ * Iterate over all headers
+ *
+ * @param   Function  callback  Executed for each item with parameters (value, name, thisArg)
+ * @param   Boolean   thisArg   `this` context for callback function
+ * @return  Void
+ */
+Headers.prototype.forEach = function(callback, thisArg) {
+	Object.getOwnPropertyNames(this._headers).forEach(function(name) {
+		this._headers[name].forEach(function(value) {
+			callback.call(thisArg, value, name, this)
+		}, this)
+	}, this)
+}
+
+/**
+ * Overwrite header values given name
+ *
+ * @param   String  name   Header name
+ * @param   String  value  Header value
+ * @return  Void
+ */
+Headers.prototype.set = function(name, value) {
+	this._headers[name.toLowerCase()] = [value];
+};
+
+/**
+ * Append a value onto existing header
+ *
+ * @param   String  name   Header name
+ * @param   String  value  Header value
+ * @return  Void
+ */
+Headers.prototype.append = function(name, value) {
+	if (!this.has(name)) {
+		this.set(name, value);
+		return;
+	}
+
+	this._headers[name.toLowerCase()].push(value);
+};
+
+/**
+ * Check for header name existence
+ *
+ * @param   String   name  Header name
+ * @return  Boolean
+ */
+Headers.prototype.has = function(name) {
+	return this._headers.hasOwnProperty(name.toLowerCase());
+};
+
+/**
+ * Delete all header values given name
+ *
+ * @param   String  name  Header name
+ * @return  Void
+ */
+Headers.prototype['delete'] = function(name) {
+	delete this._headers[name.toLowerCase()];
+};
+
+/**
+ * Return raw headers (non-spec api)
+ *
+ * @return  Object
+ */
+Headers.prototype.raw = function() {
+	return this._headers;
+};
+
+
+/***/ }),
 /* 94 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -19055,10 +19466,10 @@ module.exports = function hoistNonReactStatics(targetComponent, sourceComponent,
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_3__applyMiddleware__ = __webpack_require__(356);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_4__compose__ = __webpack_require__(159);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_5__utils_warning__ = __webpack_require__(158);
-/* unused harmony reexport createStore */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "c", function() { return __WEBPACK_IMPORTED_MODULE_0__createStore__["b"]; });
 /* unused harmony reexport combineReducers */
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_2__bindActionCreators__["a"]; });
-/* unused harmony reexport applyMiddleware */
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "b", function() { return __WEBPACK_IMPORTED_MODULE_2__bindActionCreators__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_3__applyMiddleware__["a"]; });
 /* unused harmony reexport compose */
 
 
@@ -19085,7 +19496,7 @@ if (process.env.NODE_ENV !== 'production' && typeof isCrushed.name === 'string' 
 
 "use strict";
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return ActionTypes; });
-/* unused harmony export default */
+/* harmony export (immutable) */ __webpack_exports__["b"] = createStore;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_lodash_es_isPlainObject__ = __webpack_require__(84);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_symbol_observable__ = __webpack_require__(351);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_symbol_observable___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_symbol_observable__);
@@ -20037,7 +20448,6 @@ var isExtraneousPopstateEvent = function isExtraneousPopstateEvent(event) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__home__ = __webpack_require__(387);
 
 
@@ -20047,10 +20457,48 @@ var routes = [{
   component: __WEBPACK_IMPORTED_MODULE_0__home__["a" /* default */]
 }];
 
-/* harmony default export */ __webpack_exports__["default"] = (routes);
+/* harmony default export */ __webpack_exports__["a"] = (routes);
 
 /***/ }),
-/* 170 */,
+/* 170 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * fetch-error.js
+ *
+ * FetchError interface for operational errors
+ */
+
+module.exports = FetchError;
+
+/**
+ * Create FetchError instance
+ *
+ * @param   String      message      Error message for human
+ * @param   String      type         Error type for machine
+ * @param   String      systemError  For Node.js system error
+ * @return  FetchError
+ */
+function FetchError(message, type, systemError) {
+
+	this.name = this.constructor.name;
+	this.message = message;
+	this.type = type;
+
+	// when err.type is `system`, err.code contains system error code
+	if (systemError) {
+		this.code = this.errno = systemError.code;
+	}
+
+	// hide custom error implementation details from end-users
+	Error.captureStackTrace(this, this.constructor);
+}
+
+__webpack_require__(44).inherits(FetchError, Error);
+
+
+/***/ }),
 /* 171 */
 /***/ (function(module, exports, __webpack_require__) {
 
@@ -20747,27 +21195,46 @@ exports.ArraySet = ArraySet;
 
 /***/ }),
 /* 174 */
-/***/ (function(module, exports, __webpack_require__) {
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
 
-var _jsxFileName = '/Users/komaldeepchahal/Documents/Universal_app/src/server/index.js',
+"use strict";
+Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_express__ = __webpack_require__(175);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_express___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_express__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_cors__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_cors___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_cors__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_dom_server__ = __webpack_require__(254);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_dom_server___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_dom_server__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_redux__ = __webpack_require__(336);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_router_dom__ = __webpack_require__(85);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_serialize_javascript__ = __webpack_require__(386);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_serialize_javascript___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_serialize_javascript__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shared_routes__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shared_configureStore__ = __webpack_require__(389);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shared_App__ = __webpack_require__(401);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_source_map_support_register__ = __webpack_require__(403);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_source_map_support_register___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_source_map_support_register__);
+var _jsxFileName = "/Users/komaldeepchahal/Documents/Universal_app/src/server/index.js",
     _this = this;
 
-var express = __webpack_require__(175);
-var cors = __webpack_require__(239);
-var React = __webpack_require__(5);
-var renderToString = __webpack_require__(254);
-var Provider = __webpack_require__(336);
-var matchPath = __webpack_require__(85);
-var StaticRouter = __webpack_require__(85);
-var serialize = __webpack_require__(386);
-var routes = __webpack_require__(169);
-var App = __webpack_require__(401);
-__webpack_require__(403);
 
-var app = express();
 
-app.use(cors());
-app.use(express.static("public"));
+
+
+
+
+
+
+
+
+
+
+var app = __WEBPACK_IMPORTED_MODULE_0_express___default()();
+
+app.use(__WEBPACK_IMPORTED_MODULE_1_cors___default()());
+app.use(__WEBPACK_IMPORTED_MODULE_0_express___default.a.static("public"));
 
 app.get("/api/news", function (req, res) {
   res.json([{
@@ -20846,10 +21313,10 @@ app.get("/api/news", function (req, res) {
 });
 
 app.get("*", function (req, res, next) {
-  var store = configureStore();
+  var store = Object(__WEBPACK_IMPORTED_MODULE_8__shared_configureStore__["a" /* default */])();
 
-  var promises = routes.reduce(function (acc, route) {
-    if (matchPath(req.url, route) && route.component && route.component.initialAction) {
+  var promises = __WEBPACK_IMPORTED_MODULE_7__shared_routes__["a" /* default */].reduce(function (acc, route) {
+    if (Object(__WEBPACK_IMPORTED_MODULE_5_react_router_dom__["d" /* matchPath */])(req.url, route) && route.component && route.component.initialAction) {
       acc.push(Promise.resolve(store.dispatch(route.component.initialAction())));
     }
     return acc;
@@ -20857,23 +21324,23 @@ app.get("*", function (req, res, next) {
 
   Promise.all(promises).then(function () {
     var context = {};
-    var markup = renderToString(React.createElement(
-      Provider,
+    var markup = Object(__WEBPACK_IMPORTED_MODULE_3_react_dom_server__["renderToString"])(__WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(
+      __WEBPACK_IMPORTED_MODULE_4_react_redux__["a" /* Provider */],
       { store: store, __source: {
           fileName: _jsxFileName,
           lineNumber: 121
         },
         __self: _this
       },
-      React.createElement(
-        StaticRouter,
+      __WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(
+        __WEBPACK_IMPORTED_MODULE_5_react_router_dom__["c" /* StaticRouter */],
         { location: req.url, context: context, __source: {
             fileName: _jsxFileName,
             lineNumber: 122
           },
           __self: _this
         },
-        React.createElement(App, {
+        __WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__shared_App__["a" /* default */], {
           __source: {
             fileName: _jsxFileName,
             lineNumber: 123
@@ -20884,12 +21351,12 @@ app.get("*", function (req, res, next) {
     ));
 
     var initialData = store.getState();
-    res.send('\n        <!DOCTYPE html>\n        <html>\n          <head>\n            <title>W Combinator</title>\n            <link rel="stylesheet" href="/css/main.css">\n            <script src="/bundle.js" defer></script>\n            <script>window.__initialData__ = ' + serialize(initialData) + '</script>\n          </head>\n          <body>\n            <div id="root">' + markup + '</div>\n          </body>\n        </html>\n      ');
+    res.send("\n        <!DOCTYPE html>\n        <html>\n          <head>\n            <title>W Combinator</title>\n            <link rel=\"stylesheet\" href=\"/css/main.css\">\n            <script src=\"/bundle.js\" defer></script>\n            <script>window.__initialData__ = " + __WEBPACK_IMPORTED_MODULE_6_serialize_javascript___default()(initialData) + "</script>\n          </head>\n\n          <body>\n            <div id=\"root\">" + markup + "</div>\n          </body>\n        </html>\n      ");
   }).catch(next);
 });
 
 app.listen(process.env.PORT || 3000, function () {
-  console.log("Server is listening");
+  console.log("Server is listening 3000");
 });
 
 /***/ }),
@@ -43789,14 +44256,13 @@ module.exports = '15.6.2';
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__components_Provider__ = __webpack_require__(337);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1__components_connectAdvanced__ = __webpack_require__(153);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__connect_connect__ = __webpack_require__(340);
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "Provider", function() { return __WEBPACK_IMPORTED_MODULE_0__components_Provider__["b"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "createProvider", function() { return __WEBPACK_IMPORTED_MODULE_0__components_Provider__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "connectAdvanced", function() { return __WEBPACK_IMPORTED_MODULE_1__components_connectAdvanced__["a"]; });
-/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "connect", function() { return __WEBPACK_IMPORTED_MODULE_2__connect_connect__["a"]; });
+/* harmony reexport (binding) */ __webpack_require__.d(__webpack_exports__, "a", function() { return __WEBPACK_IMPORTED_MODULE_0__components_Provider__["a"]; });
+/* unused harmony reexport createProvider */
+/* unused harmony reexport connectAdvanced */
+/* unused harmony reexport connect */
 
 
 
@@ -43808,7 +44274,7 @@ Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* harmony export (immutable) */ __webpack_exports__["a"] = createProvider;
+/* unused harmony export createProvider */
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_prop_types__ = __webpack_require__(8);
@@ -43886,7 +44352,7 @@ function createProvider() {
   return Provider;
 }
 
-/* harmony default export */ __webpack_exports__["b"] = (createProvider());
+/* harmony default export */ __webpack_exports__["a"] = (createProvider());
 
 /***/ }),
 /* 338 */
@@ -44166,7 +44632,7 @@ function createConnect() {
   };
 }
 
-/* harmony default export */ __webpack_exports__["a"] = (createConnect());
+/* unused harmony default export */ var _unused_webpack_default_export = (createConnect());
 
 /***/ }),
 /* 341 */
@@ -44230,7 +44696,7 @@ function whenMapDispatchToPropsIsMissing(mapDispatchToProps) {
 
 function whenMapDispatchToPropsIsObject(mapDispatchToProps) {
   return mapDispatchToProps && typeof mapDispatchToProps === 'object' ? Object(__WEBPACK_IMPORTED_MODULE_1__wrapMapToProps__["a" /* wrapMapToPropsConstant */])(function (dispatch) {
-    return Object(__WEBPACK_IMPORTED_MODULE_0_redux__["a" /* bindActionCreators */])(mapDispatchToProps, dispatch);
+    return Object(__WEBPACK_IMPORTED_MODULE_0_redux__["b" /* bindActionCreators */])(mapDispatchToProps, dispatch);
   }) : undefined;
 }
 
@@ -44728,7 +45194,7 @@ function bindActionCreators(actionCreators, dispatch) {
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-/* unused harmony export default */
+/* harmony export (immutable) */ __webpack_exports__["a"] = applyMiddleware;
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0__compose__ = __webpack_require__(159);
 var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
@@ -45059,7 +45525,7 @@ BrowserRouter.propTypes = {
 };
 
 
-/* harmony default export */ __webpack_exports__["a"] = (BrowserRouter);
+/* unused harmony default export */ var _unused_webpack_default_export = (BrowserRouter);
 
 /***/ }),
 /* 362 */
@@ -45438,7 +45904,7 @@ HashRouter.propTypes = {
 };
 
 
-/* harmony default export */ __webpack_exports__["a"] = (HashRouter);
+/* unused harmony default export */ var _unused_webpack_default_export = (HashRouter);
 
 /***/ }),
 /* 364 */
@@ -45779,7 +46245,7 @@ exports.default = createHashHistory;
 // Written in this round about way for babel-transform-imports
 
 
-/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_MemoryRouter__["a" /* default */]);
+/* unused harmony default export */ var _unused_webpack_default_export = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_MemoryRouter__["a" /* default */]);
 
 /***/ }),
 /* 366 */
@@ -46103,7 +46569,7 @@ NavLink.defaultProps = {
   ariaCurrent: 'true'
 };
 
-/* harmony default export */ __webpack_exports__["a"] = (NavLink);
+/* unused harmony default export */ var _unused_webpack_default_export = (NavLink);
 
 /***/ }),
 /* 369 */
@@ -46555,7 +47021,7 @@ module.exports = Array.isArray || function (arr) {
 // Written in this round about way for babel-transform-imports
 
 
-/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Prompt__["a" /* default */]);
+/* unused harmony default export */ var _unused_webpack_default_export = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Prompt__["a" /* default */]);
 
 /***/ }),
 /* 372 */
@@ -46657,7 +47123,7 @@ Prompt.contextTypes = {
 // Written in this round about way for babel-transform-imports
 
 
-/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Redirect__["a" /* default */]);
+/* unused harmony default export */ var _unused_webpack_default_export = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Redirect__["a" /* default */]);
 
 /***/ }),
 /* 374 */
@@ -47790,7 +48256,7 @@ StaticRouter.childContextTypes = {
 // Written in this round about way for babel-transform-imports
 
 
-/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Switch__["a" /* default */]);
+/* unused harmony default export */ var _unused_webpack_default_export = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_Switch__["a" /* default */]);
 
 /***/ }),
 /* 382 */
@@ -47906,7 +48372,7 @@ Switch.propTypes = {
 // Written in this round about way for babel-transform-imports
 
 
-/* harmony default export */ __webpack_exports__["a"] = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_withRouter__["a" /* default */]);
+/* unused harmony default export */ var _unused_webpack_default_export = (__WEBPACK_IMPORTED_MODULE_0_react_router_es_withRouter__["a" /* default */]);
 
 /***/ }),
 /* 385 */
@@ -48117,7 +48583,7 @@ var Home = function (_Component) {
         "div",
         { className: "home", __source: {
             fileName: _jsxFileName,
-            lineNumber: 8
+            lineNumber: 9
           },
           __self: this
         },
@@ -48126,7 +48592,7 @@ var Home = function (_Component) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 9
+              lineNumber: 10
             },
             __self: this
           },
@@ -48134,7 +48600,7 @@ var Home = function (_Component) {
             "p",
             { className: "selected", __source: {
                 fileName: _jsxFileName,
-                lineNumber: 10
+                lineNumber: 11
               },
               __self: this
             },
@@ -48145,15 +48611,15 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 11
+                lineNumber: 12
               },
               __self: this
             },
             __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-              __WEBPACK_IMPORTED_MODULE_1_react_router_dom__["Link"],
+              __WEBPACK_IMPORTED_MODULE_1_react_router_dom__["a" /* Link */],
               { to: "/news", __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 12
+                  lineNumber: 13
                 },
                 __self: this
               },
@@ -48166,7 +48632,7 @@ var Home = function (_Component) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 15
+              lineNumber: 16
             },
             __self: this
           },
@@ -48175,7 +48641,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 16
+                lineNumber: 17
               },
               __self: this
             },
@@ -48186,7 +48652,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 17
+                lineNumber: 18
               },
               __self: this
             },
@@ -48197,7 +48663,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 21
+                lineNumber: 22
               },
               __self: this
             },
@@ -48208,7 +48674,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 28
               },
               __self: this
             },
@@ -48231,23 +48697,736 @@ var Home = function (_Component) {
 
 
 /***/ }),
-/* 389 */,
-/* 390 */,
-/* 391 */,
-/* 392 */,
-/* 393 */,
-/* 394 */,
-/* 395 */,
-/* 396 */,
-/* 397 */,
-/* 398 */,
-/* 399 */,
-/* 400 */,
+/* 389 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_redux__ = __webpack_require__(155);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_redux_thunk__ = __webpack_require__(390);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_redux_thunk___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_redux_thunk__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2__ducks__ = __webpack_require__(391);
+
+
+
+
+var configureStore = function configureStore(preloadedState) {
+  return Object(__WEBPACK_IMPORTED_MODULE_0_redux__["c" /* createStore */])(__WEBPACK_IMPORTED_MODULE_2__ducks__["a" /* default */], preloadedState, Object(__WEBPACK_IMPORTED_MODULE_0_redux__["a" /* applyMiddleware */])(__WEBPACK_IMPORTED_MODULE_1_redux_thunk___default.a));
+};
+
+/* harmony default export */ __webpack_exports__["a"] = (configureStore);
+
+/***/ }),
+/* 390 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+exports.__esModule = true;
+function createThunkMiddleware(extraArgument) {
+  return function (_ref) {
+    var dispatch = _ref.dispatch,
+        getState = _ref.getState;
+    return function (next) {
+      return function (action) {
+        if (typeof action === 'function') {
+          return action(dispatch, getState, extraArgument);
+        }
+
+        return next(action);
+      };
+    };
+  };
+}
+
+var thunk = createThunkMiddleware();
+thunk.withExtraArgument = createThunkMiddleware;
+
+exports['default'] = thunk;
+
+/***/ }),
+/* 391 */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+/* harmony export (immutable) */ __webpack_exports__["a"] = reducer;
+/* unused harmony export fetchNews */
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_isomorphic_fetch__ = __webpack_require__(392);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_isomorphic_fetch___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_isomorphic_fetch__);
+
+
+// Actions
+var FETCH_NEWS_REQUEST = "FETCH_NEWS_REQUEST";
+var FETCH_NEWS_SUCCESS = "FETCH_NEWS_SUCCESS";
+var FETCH_NEWS_FAILURE = "FETCH_NEWS_FAILURE";
+
+// Reducer
+function reducer() {
+  var state = arguments.length > 0 && arguments[0] !== undefined ? arguments[0] : {};
+  var action = arguments[1];
+
+  switch (action.type) {
+    case FETCH_NEWS_SUCCESS:
+      return Object.assign({}, state, { news: action.payload });
+
+    default:
+      return state;
+  }
+}
+
+// Action Creators
+var requestNews = function requestNews() {
+  return { type: FETCH_NEWS_REQUEST };
+};
+var receivedNews = function receivedNews(news) {
+  return { type: FETCH_NEWS_SUCCESS, payload: news };
+};
+var newsError = function newsError() {
+  return { type: FETCH_NEWS_FAILURE };
+};
+
+var fetchNews = function fetchNews() {
+  return function (dispatch, getState) {
+    dispatch(requestNews());
+    return fetch("http://localhost:3000/api/news").then(function (response) {
+      return response.json();
+    }).then(function (news) {
+      return dispatch(receivedNews(news));
+    }).catch(function (err) {
+      return dispatch(newsError(err));
+    });
+  };
+};
+
+/***/ }),
+/* 392 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var realFetch = __webpack_require__(393);
+module.exports = function(url, options) {
+	if (/^\/\//.test(url)) {
+		url = 'https:' + url;
+	}
+	return realFetch.call(this, url, options);
+};
+
+if (!global.fetch) {
+	global.fetch = module.exports;
+	global.Response = realFetch.Response;
+	global.Headers = realFetch.Headers;
+	global.Request = realFetch.Request;
+}
+
+
+/***/ }),
+/* 393 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * index.js
+ *
+ * a request API compatible with window.fetch
+ */
+
+var parse_url = __webpack_require__(32).parse;
+var resolve_url = __webpack_require__(32).resolve;
+var http = __webpack_require__(25);
+var https = __webpack_require__(394);
+var zlib = __webpack_require__(102);
+var stream = __webpack_require__(21);
+
+var Body = __webpack_require__(92);
+var Response = __webpack_require__(399);
+var Headers = __webpack_require__(93);
+var Request = __webpack_require__(400);
+var FetchError = __webpack_require__(170);
+
+// commonjs
+module.exports = Fetch;
+// es6 default export compatibility
+module.exports.default = module.exports;
+
+/**
+ * Fetch class
+ *
+ * @param   Mixed    url   Absolute url or Request instance
+ * @param   Object   opts  Fetch options
+ * @return  Promise
+ */
+function Fetch(url, opts) {
+
+	// allow call as function
+	if (!(this instanceof Fetch))
+		return new Fetch(url, opts);
+
+	// allow custom promise
+	if (!Fetch.Promise) {
+		throw new Error('native promise missing, set Fetch.Promise to your favorite alternative');
+	}
+
+	Body.Promise = Fetch.Promise;
+
+	var self = this;
+
+	// wrap http.request into fetch
+	return new Fetch.Promise(function(resolve, reject) {
+		// build request object
+		var options = new Request(url, opts);
+
+		if (!options.protocol || !options.hostname) {
+			throw new Error('only absolute urls are supported');
+		}
+
+		if (options.protocol !== 'http:' && options.protocol !== 'https:') {
+			throw new Error('only http(s) protocols are supported');
+		}
+
+		var send;
+		if (options.protocol === 'https:') {
+			send = https.request;
+		} else {
+			send = http.request;
+		}
+
+		// normalize headers
+		var headers = new Headers(options.headers);
+
+		if (options.compress) {
+			headers.set('accept-encoding', 'gzip,deflate');
+		}
+
+		if (!headers.has('user-agent')) {
+			headers.set('user-agent', 'node-fetch/1.0 (+https://github.com/bitinn/node-fetch)');
+		}
+
+		if (!headers.has('connection') && !options.agent) {
+			headers.set('connection', 'close');
+		}
+
+		if (!headers.has('accept')) {
+			headers.set('accept', '*/*');
+		}
+
+		// detect form data input from form-data module, this hack avoid the need to pass multipart header manually
+		if (!headers.has('content-type') && options.body && typeof options.body.getBoundary === 'function') {
+			headers.set('content-type', 'multipart/form-data; boundary=' + options.body.getBoundary());
+		}
+
+		// bring node-fetch closer to browser behavior by setting content-length automatically
+		if (!headers.has('content-length') && /post|put|patch|delete/i.test(options.method)) {
+			if (typeof options.body === 'string') {
+				headers.set('content-length', Buffer.byteLength(options.body));
+			// detect form data input from form-data module, this hack avoid the need to add content-length header manually
+			} else if (options.body && typeof options.body.getLengthSync === 'function') {
+				// for form-data 1.x
+				if (options.body._lengthRetrievers && options.body._lengthRetrievers.length == 0) {
+					headers.set('content-length', options.body.getLengthSync().toString());
+				// for form-data 2.x
+				} else if (options.body.hasKnownLength && options.body.hasKnownLength()) {
+					headers.set('content-length', options.body.getLengthSync().toString());
+				}
+			// this is only necessary for older nodejs releases (before iojs merge)
+			} else if (options.body === undefined || options.body === null) {
+				headers.set('content-length', '0');
+			}
+		}
+
+		options.headers = headers.raw();
+
+		// http.request only support string as host header, this hack make custom host header possible
+		if (options.headers.host) {
+			options.headers.host = options.headers.host[0];
+		}
+
+		// send request
+		var req = send(options);
+		var reqTimeout;
+
+		if (options.timeout) {
+			req.once('socket', function(socket) {
+				reqTimeout = setTimeout(function() {
+					req.abort();
+					reject(new FetchError('network timeout at: ' + options.url, 'request-timeout'));
+				}, options.timeout);
+			});
+		}
+
+		req.on('error', function(err) {
+			clearTimeout(reqTimeout);
+			reject(new FetchError('request to ' + options.url + ' failed, reason: ' + err.message, 'system', err));
+		});
+
+		req.on('response', function(res) {
+			clearTimeout(reqTimeout);
+
+			// handle redirect
+			if (self.isRedirect(res.statusCode) && options.redirect !== 'manual') {
+				if (options.redirect === 'error') {
+					reject(new FetchError('redirect mode is set to error: ' + options.url, 'no-redirect'));
+					return;
+				}
+
+				if (options.counter >= options.follow) {
+					reject(new FetchError('maximum redirect reached at: ' + options.url, 'max-redirect'));
+					return;
+				}
+
+				if (!res.headers.location) {
+					reject(new FetchError('redirect location header missing at: ' + options.url, 'invalid-redirect'));
+					return;
+				}
+
+				// per fetch spec, for POST request with 301/302 response, or any request with 303 response, use GET when following redirect
+				if (res.statusCode === 303
+					|| ((res.statusCode === 301 || res.statusCode === 302) && options.method === 'POST'))
+				{
+					options.method = 'GET';
+					delete options.body;
+					delete options.headers['content-length'];
+				}
+
+				options.counter++;
+
+				resolve(Fetch(resolve_url(options.url, res.headers.location), options));
+				return;
+			}
+
+			// normalize location header for manual redirect mode
+			var headers = new Headers(res.headers);
+			if (options.redirect === 'manual' && headers.has('location')) {
+				headers.set('location', resolve_url(options.url, headers.get('location')));
+			}
+
+			// prepare response
+			var body = res.pipe(new stream.PassThrough());
+			var response_options = {
+				url: options.url
+				, status: res.statusCode
+				, statusText: res.statusMessage
+				, headers: headers
+				, size: options.size
+				, timeout: options.timeout
+			};
+
+			// response object
+			var output;
+
+			// in following scenarios we ignore compression support
+			// 1. compression support is disabled
+			// 2. HEAD request
+			// 3. no content-encoding header
+			// 4. no content response (204)
+			// 5. content not modified response (304)
+			if (!options.compress || options.method === 'HEAD' || !headers.has('content-encoding') || res.statusCode === 204 || res.statusCode === 304) {
+				output = new Response(body, response_options);
+				resolve(output);
+				return;
+			}
+
+			// otherwise, check for gzip or deflate
+			var name = headers.get('content-encoding');
+
+			// for gzip
+			if (name == 'gzip' || name == 'x-gzip') {
+				body = body.pipe(zlib.createGunzip());
+				output = new Response(body, response_options);
+				resolve(output);
+				return;
+
+			// for deflate
+			} else if (name == 'deflate' || name == 'x-deflate') {
+				// handle the infamous raw deflate response from old servers
+				// a hack for old IIS and Apache servers
+				var raw = res.pipe(new stream.PassThrough());
+				raw.once('data', function(chunk) {
+					// see http://stackoverflow.com/questions/37519828
+					if ((chunk[0] & 0x0F) === 0x08) {
+						body = body.pipe(zlib.createInflate());
+					} else {
+						body = body.pipe(zlib.createInflateRaw());
+					}
+					output = new Response(body, response_options);
+					resolve(output);
+				});
+				return;
+			}
+
+			// otherwise, use response as-is
+			output = new Response(body, response_options);
+			resolve(output);
+			return;
+		});
+
+		// accept string, buffer or readable stream as body
+		// per spec we will call tostring on non-stream objects
+		if (typeof options.body === 'string') {
+			req.write(options.body);
+			req.end();
+		} else if (options.body instanceof Buffer) {
+			req.write(options.body);
+			req.end();
+		} else if (typeof options.body === 'object' && options.body.pipe) {
+			options.body.pipe(req);
+		} else if (typeof options.body === 'object') {
+			req.write(options.body.toString());
+			req.end();
+		} else {
+			req.end();
+		}
+	});
+
+};
+
+/**
+ * Redirect code matching
+ *
+ * @param   Number   code  Status code
+ * @return  Boolean
+ */
+Fetch.prototype.isRedirect = function(code) {
+	return code === 301 || code === 302 || code === 303 || code === 307 || code === 308;
+}
+
+// expose Promise
+Fetch.Promise = global.Promise;
+Fetch.Response = Response;
+Fetch.Headers = Headers;
+Fetch.Request = Request;
+
+
+/***/ }),
+/* 394 */
+/***/ (function(module, exports) {
+
+module.exports = require("https");
+
+/***/ }),
+/* 395 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var iconvLite = __webpack_require__(57);
+// Load Iconv from an external file to be able to disable Iconv for webpack
+// Add /\/iconv-loader$/ to webpack.IgnorePlugin to ignore it
+var Iconv = __webpack_require__(396);
+
+// Expose to the world
+module.exports.convert = convert;
+
+/**
+ * Convert encoding of an UTF-8 string or a buffer
+ *
+ * @param {String|Buffer} str String to be converted
+ * @param {String} to Encoding to be converted to
+ * @param {String} [from='UTF-8'] Encoding to be converted from
+ * @param {Boolean} useLite If set to ture, force to use iconvLite
+ * @return {Buffer} Encoded string
+ */
+function convert(str, to, from, useLite) {
+    from = checkEncoding(from || 'UTF-8');
+    to = checkEncoding(to || 'UTF-8');
+    str = str || '';
+
+    var result;
+
+    if (from !== 'UTF-8' && typeof str === 'string') {
+        str = new Buffer(str, 'binary');
+    }
+
+    if (from === to) {
+        if (typeof str === 'string') {
+            result = new Buffer(str);
+        } else {
+            result = str;
+        }
+    } else if (Iconv && !useLite) {
+        try {
+            result = convertIconv(str, to, from);
+        } catch (E) {
+            console.error(E);
+            try {
+                result = convertIconvLite(str, to, from);
+            } catch (E) {
+                console.error(E);
+                result = str;
+            }
+        }
+    } else {
+        try {
+            result = convertIconvLite(str, to, from);
+        } catch (E) {
+            console.error(E);
+            result = str;
+        }
+    }
+
+
+    if (typeof result === 'string') {
+        result = new Buffer(result, 'utf-8');
+    }
+
+    return result;
+}
+
+/**
+ * Convert encoding of a string with node-iconv (if available)
+ *
+ * @param {String|Buffer} str String to be converted
+ * @param {String} to Encoding to be converted to
+ * @param {String} [from='UTF-8'] Encoding to be converted from
+ * @return {Buffer} Encoded string
+ */
+function convertIconv(str, to, from) {
+    var response, iconv;
+    iconv = new Iconv(from, to + '//TRANSLIT//IGNORE');
+    response = iconv.convert(str);
+    return response.slice(0, response.length);
+}
+
+/**
+ * Convert encoding of astring with iconv-lite
+ *
+ * @param {String|Buffer} str String to be converted
+ * @param {String} to Encoding to be converted to
+ * @param {String} [from='UTF-8'] Encoding to be converted from
+ * @return {Buffer} Encoded string
+ */
+function convertIconvLite(str, to, from) {
+    if (to === 'UTF-8') {
+        return iconvLite.decode(str, from);
+    } else if (from === 'UTF-8') {
+        return iconvLite.encode(str, to);
+    } else {
+        return iconvLite.encode(iconvLite.decode(str, from), to);
+    }
+}
+
+/**
+ * Converts charset name if needed
+ *
+ * @param {String} name Character set
+ * @return {String} Character set name
+ */
+function checkEncoding(name) {
+    return (name || '').toString().trim().
+    replace(/^latin[\-_]?(\d+)$/i, 'ISO-8859-$1').
+    replace(/^win(?:dows)?[\-_]?(\d+)$/i, 'WINDOWS-$1').
+    replace(/^utf[\-_]?(\d+)$/i, 'UTF-$1').
+    replace(/^ks_c_5601\-1987$/i, 'CP949').
+    replace(/^us[\-_]?ascii$/i, 'ASCII').
+    toUpperCase();
+}
+
+
+/***/ }),
+/* 396 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var iconv_package;
+var Iconv;
+
+try {
+    // this is to fool browserify so it doesn't try (in vain) to install iconv.
+    iconv_package = 'iconv';
+    Iconv = !(function webpackMissingModule() { var e = new Error("Cannot find module \".\""); e.code = 'MODULE_NOT_FOUND'; throw e; }()).Iconv;
+} catch (E) {
+    // node-iconv not present
+}
+
+module.exports = Iconv;
+
+
+/***/ }),
+/* 397 */
+/***/ (function(module, exports) {
+
+function webpackEmptyContext(req) {
+	throw new Error("Cannot find module '" + req + "'.");
+}
+webpackEmptyContext.keys = function() { return []; };
+webpackEmptyContext.resolve = webpackEmptyContext;
+module.exports = webpackEmptyContext;
+webpackEmptyContext.id = 397;
+
+/***/ }),
+/* 398 */
+/***/ (function(module, exports, __webpack_require__) {
+
+"use strict";
+
+
+var isStream = module.exports = function (stream) {
+	return stream !== null && typeof stream === 'object' && typeof stream.pipe === 'function';
+};
+
+isStream.writable = function (stream) {
+	return isStream(stream) && stream.writable !== false && typeof stream._write === 'function' && typeof stream._writableState === 'object';
+};
+
+isStream.readable = function (stream) {
+	return isStream(stream) && stream.readable !== false && typeof stream._read === 'function' && typeof stream._readableState === 'object';
+};
+
+isStream.duplex = function (stream) {
+	return isStream.writable(stream) && isStream.readable(stream);
+};
+
+isStream.transform = function (stream) {
+	return isStream.duplex(stream) && typeof stream._transform === 'function' && typeof stream._transformState === 'object';
+};
+
+
+/***/ }),
+/* 399 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * response.js
+ *
+ * Response class provides content decoding
+ */
+
+var http = __webpack_require__(25);
+var Headers = __webpack_require__(93);
+var Body = __webpack_require__(92);
+
+module.exports = Response;
+
+/**
+ * Response class
+ *
+ * @param   Stream  body  Readable stream
+ * @param   Object  opts  Response options
+ * @return  Void
+ */
+function Response(body, opts) {
+
+	opts = opts || {};
+
+	this.url = opts.url;
+	this.status = opts.status || 200;
+	this.statusText = opts.statusText || http.STATUS_CODES[this.status];
+	this.headers = new Headers(opts.headers);
+	this.ok = this.status >= 200 && this.status < 300;
+
+	Body.call(this, body, opts);
+
+}
+
+Response.prototype = Object.create(Body.prototype);
+
+/**
+ * Clone this response
+ *
+ * @return  Response
+ */
+Response.prototype.clone = function() {
+	return new Response(this._clone(this), {
+		url: this.url
+		, status: this.status
+		, statusText: this.statusText
+		, headers: this.headers
+		, ok: this.ok
+	});
+};
+
+
+/***/ }),
+/* 400 */
+/***/ (function(module, exports, __webpack_require__) {
+
+
+/**
+ * request.js
+ *
+ * Request class contains server only options
+ */
+
+var parse_url = __webpack_require__(32).parse;
+var Headers = __webpack_require__(93);
+var Body = __webpack_require__(92);
+
+module.exports = Request;
+
+/**
+ * Request class
+ *
+ * @param   Mixed   input  Url or Request instance
+ * @param   Object  init   Custom options
+ * @return  Void
+ */
+function Request(input, init) {
+	var url, url_parsed;
+
+	// normalize input
+	if (!(input instanceof Request)) {
+		url = input;
+		url_parsed = parse_url(url);
+		input = {};
+	} else {
+		url = input.url;
+		url_parsed = parse_url(url);
+	}
+
+	// normalize init
+	init = init || {};
+
+	// fetch spec options
+	this.method = init.method || input.method || 'GET';
+	this.redirect = init.redirect || input.redirect || 'follow';
+	this.headers = new Headers(init.headers || input.headers || {});
+	this.url = url;
+
+	// server only options
+	this.follow = init.follow !== undefined ?
+		init.follow : input.follow !== undefined ?
+		input.follow : 20;
+	this.compress = init.compress !== undefined ?
+		init.compress : input.compress !== undefined ?
+		input.compress : true;
+	this.counter = init.counter || input.counter || 0;
+	this.agent = init.agent || input.agent;
+
+	Body.call(this, init.body || this._clone(input), {
+		timeout: init.timeout || input.timeout || 0,
+		size: init.size || input.size || 0
+	});
+
+	// server request options
+	this.protocol = url_parsed.protocol;
+	this.hostname = url_parsed.hostname;
+	this.port = url_parsed.port;
+	this.path = url_parsed.path;
+	this.auth = url_parsed.auth;
+}
+
+Request.prototype = Object.create(Body.prototype);
+
+/**
+ * Clone this request
+ *
+ * @return  Request
+ */
+Request.prototype.clone = function() {
+	return new Request(this);
+};
+
+
+/***/ }),
 /* 401 */
 /***/ (function(module, __webpack_exports__, __webpack_require__) {
 
 "use strict";
-Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react__ = __webpack_require__(5);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_react__);
 /* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react_router_dom__ = __webpack_require__(85);
@@ -48292,8 +49471,8 @@ var App = function (_Component) {
           },
           __self: this
         },
-        __WEBPACK_IMPORTED_MODULE_2__routes__["default"].map(function (route, i) {
-          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1_react_router_dom__["Route"], Object.assign({ key: i }, route, {
+        __WEBPACK_IMPORTED_MODULE_2__routes__["a" /* default */].map(function (route, i) {
+          return __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_1_react_router_dom__["b" /* Route */], Object.assign({ key: i }, route, {
             __source: {
               fileName: _jsxFileName,
               lineNumber: 10
@@ -48308,7 +49487,7 @@ var App = function (_Component) {
   return App;
 }(__WEBPACK_IMPORTED_MODULE_0_react__["Component"]);
 
-/* harmony default export */ __webpack_exports__["default"] = (App);
+/* harmony default export */ __webpack_exports__["a"] = (App);
 
 /***/ }),
 /* 402 */

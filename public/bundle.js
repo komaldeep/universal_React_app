@@ -29431,7 +29431,7 @@ var Home = function (_Component) {
         "div",
         { className: "home", __source: {
             fileName: _jsxFileName,
-            lineNumber: 8
+            lineNumber: 9
           },
           __self: this
         },
@@ -29440,7 +29440,7 @@ var Home = function (_Component) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 9
+              lineNumber: 10
             },
             __self: this
           },
@@ -29448,7 +29448,7 @@ var Home = function (_Component) {
             "p",
             { className: "selected", __source: {
                 fileName: _jsxFileName,
-                lineNumber: 10
+                lineNumber: 11
               },
               __self: this
             },
@@ -29459,7 +29459,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 11
+                lineNumber: 12
               },
               __self: this
             },
@@ -29467,7 +29467,7 @@ var Home = function (_Component) {
               __WEBPACK_IMPORTED_MODULE_1_react_router_dom__["b" /* Link */],
               { to: "/news", __source: {
                   fileName: _jsxFileName,
-                  lineNumber: 12
+                  lineNumber: 13
                 },
                 __self: this
               },
@@ -29480,7 +29480,7 @@ var Home = function (_Component) {
           {
             __source: {
               fileName: _jsxFileName,
-              lineNumber: 15
+              lineNumber: 16
             },
             __self: this
           },
@@ -29489,7 +29489,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 16
+                lineNumber: 17
               },
               __self: this
             },
@@ -29500,7 +29500,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 17
+                lineNumber: 18
               },
               __self: this
             },
@@ -29511,7 +29511,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 21
+                lineNumber: 22
               },
               __self: this
             },
@@ -29522,7 +29522,7 @@ var Home = function (_Component) {
             {
               __source: {
                 fileName: _jsxFileName,
-                lineNumber: 27
+                lineNumber: 28
               },
               __self: this
             },
