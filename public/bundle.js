@@ -29505,28 +29505,6 @@ var Home = function (_Component) {
               __self: this
             },
             "Twice a year we invest a small amount of mana in a large number of wizards (recently 105)."
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "p",
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 22
-              },
-              __self: this
-            },
-            "The wizards move to the Highlands of Scotland for 3 months, during which we work intensively with them to get the magic into the best possible shape and refine their pitch to patrons. Each cycle culminates in Demo Day, when the wizards present their magic to a carefully selected, invite-only audience."
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "p",
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 28
-              },
-              __self: this
-            },
-            "But WC doesn\u2019t end on Demo Day. We and the WC alumni network continue to help mages for the life of their magic, and beyond."
           )
         )
       );

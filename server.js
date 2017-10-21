@@ -21199,26 +21199,25 @@ exports.ArraySet = ArraySet;
 
 "use strict";
 Object.defineProperty(__webpack_exports__, "__esModule", { value: true });
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_express__ = __webpack_require__(175);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_express___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_express__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_cors__ = __webpack_require__(239);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_cors___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_cors__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react__ = __webpack_require__(5);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_dom_server__ = __webpack_require__(254);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_dom_server___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_3_react_dom_server__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_redux__ = __webpack_require__(336);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_react_router_dom__ = __webpack_require__(85);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_serialize_javascript__ = __webpack_require__(386);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6_serialize_javascript___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_6_serialize_javascript__);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shared_routes__ = __webpack_require__(169);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shared_configureStore__ = __webpack_require__(389);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9__shared_App__ = __webpack_require__(401);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_source_map_support_register__ = __webpack_require__(403);
-/* harmony import */ var __WEBPACK_IMPORTED_MODULE_10_source_map_support_register___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_10_source_map_support_register__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_cors__ = __webpack_require__(239);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_0_cors___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_0_cors__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react__ = __webpack_require__(5);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_1_react___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_1_react__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_dom_server__ = __webpack_require__(254);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_2_react_dom_server___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_2_react_dom_server__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_3_react_redux__ = __webpack_require__(336);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_4_react_router_dom__ = __webpack_require__(85);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_serialize_javascript__ = __webpack_require__(386);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_5_serialize_javascript___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_5_serialize_javascript__);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_6__shared_routes__ = __webpack_require__(169);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_7__shared_configureStore__ = __webpack_require__(389);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_8__shared_App__ = __webpack_require__(401);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_source_map_support_register__ = __webpack_require__(403);
+/* harmony import */ var __WEBPACK_IMPORTED_MODULE_9_source_map_support_register___default = __webpack_require__.n(__WEBPACK_IMPORTED_MODULE_9_source_map_support_register__);
 var _jsxFileName = "/Users/komaldeepchahal/Documents/Universal_app/src/server/index.js",
     _this = this;
 
+var express = __webpack_require__(175);
 
 
 
@@ -21230,93 +21229,16 @@ var _jsxFileName = "/Users/komaldeepchahal/Documents/Universal_app/src/server/in
 
 
 
+var app = express();
 
-var app = __WEBPACK_IMPORTED_MODULE_0_express___default()();
-
-app.use(__WEBPACK_IMPORTED_MODULE_1_cors___default()());
-app.use(__WEBPACK_IMPORTED_MODULE_0_express___default.a.static("public"));
-
-app.get("/api/news", function (req, res) {
-  res.json([{
-    id: 1,
-    upvotes: 130,
-    title: "Fianto Duri, the complete tutorial",
-    author: "RubeusH",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 2,
-    upvotes: 126,
-    title: "Ordinary Wizarding Levels study guide",
-    author: "BathBabb",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 3,
-    upvotes: 114,
-    title: "Is muggle-baiting ever acceptable?",
-    author: "Falco",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 4,
-    upvotes: 97,
-    title: "Untransfiguration classes to become compulsory at Hogwarts",
-    author: "Baddock",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 5,
-    upvotes: 85,
-    title: "Cracking the Aurologist Interview ",
-    author: "Hetty",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 6,
-    upvotes: 74,
-    title: "Conserving waterplants cheatsheet.",
-    author: "Otto",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 7,
-    upvotes: 66,
-    title: "The Pragmatic Dragon Feeder",
-    author: "Baruffio",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 8,
-    upvotes: 50,
-    title: "The complete quidditch statistics",
-    author: "Hbeery",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 9,
-    upvotes: 34,
-    title: "Cracking the Aurologist Interview ",
-    author: "Marcusb",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 10,
-    upvotes: 29,
-    title: "Could wizards prevent WW3?",
-    author: "Cuthbert",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 11,
-    upvotes: 20,
-    title: "ASK WN: What do you use to digitalize your scrolls?",
-    author: "Alphard",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }, {
-    id: 12,
-    upvotes: 16,
-    title: "Show WN: Wand-Extinguishing Protection",
-    author: "Humphrey22",
-    date: new Date("2017-04-14T15:30:00.000Z")
-  }]);
-});
+app.use(__WEBPACK_IMPORTED_MODULE_0_cors___default()());
+app.use(express.static("public"));
 
 app.get("*", function (req, res, next) {
-  var store = Object(__WEBPACK_IMPORTED_MODULE_8__shared_configureStore__["a" /* default */])();
+  var store = Object(__WEBPACK_IMPORTED_MODULE_7__shared_configureStore__["a" /* default */])();
 
-  var promises = __WEBPACK_IMPORTED_MODULE_7__shared_routes__["a" /* default */].reduce(function (acc, route) {
-    if (Object(__WEBPACK_IMPORTED_MODULE_5_react_router_dom__["d" /* matchPath */])(req.url, route) && route.component && route.component.initialAction) {
+  var promises = __WEBPACK_IMPORTED_MODULE_6__shared_routes__["a" /* default */].reduce(function (acc, route) {
+    if (Object(__WEBPACK_IMPORTED_MODULE_4_react_router_dom__["d" /* matchPath */])(req.url, route) && route.component && route.component.initialAction) {
       acc.push(Promise.resolve(store.dispatch(route.component.initialAction())));
     }
     return acc;
@@ -21324,26 +21246,26 @@ app.get("*", function (req, res, next) {
 
   Promise.all(promises).then(function () {
     var context = {};
-    var markup = Object(__WEBPACK_IMPORTED_MODULE_3_react_dom_server__["renderToString"])(__WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(
-      __WEBPACK_IMPORTED_MODULE_4_react_redux__["a" /* Provider */],
+    var markup = Object(__WEBPACK_IMPORTED_MODULE_2_react_dom_server__["renderToString"])(__WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+      __WEBPACK_IMPORTED_MODULE_3_react_redux__["a" /* Provider */],
       { store: store, __source: {
           fileName: _jsxFileName,
-          lineNumber: 121
+          lineNumber: 32
         },
         __self: _this
       },
-      __WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(
-        __WEBPACK_IMPORTED_MODULE_5_react_router_dom__["c" /* StaticRouter */],
+      __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(
+        __WEBPACK_IMPORTED_MODULE_4_react_router_dom__["c" /* StaticRouter */],
         { location: req.url, context: context, __source: {
             fileName: _jsxFileName,
-            lineNumber: 122
+            lineNumber: 33
           },
           __self: _this
         },
-        __WEBPACK_IMPORTED_MODULE_2_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_9__shared_App__["a" /* default */], {
+        __WEBPACK_IMPORTED_MODULE_1_react___default.a.createElement(__WEBPACK_IMPORTED_MODULE_8__shared_App__["a" /* default */], {
           __source: {
             fileName: _jsxFileName,
-            lineNumber: 123
+            lineNumber: 34
           },
           __self: _this
         })
@@ -21351,7 +21273,7 @@ app.get("*", function (req, res, next) {
     ));
 
     var initialData = store.getState();
-    res.send("\n        <!DOCTYPE html>\n        <html>\n          <head>\n            <title>W Combinator</title>\n            <link rel=\"stylesheet\" href=\"/css/main.css\">\n            <script src=\"/bundle.js\" defer></script>\n            <script>window.__initialData__ = " + __WEBPACK_IMPORTED_MODULE_6_serialize_javascript___default()(initialData) + "</script>\n          </head>\n\n          <body>\n            <div id=\"root\">" + markup + "</div>\n          </body>\n        </html>\n      ");
+    res.send("\n        <!DOCTYPE html>\n        <html>\n          <head>\n            <title>W Combinator</title>\n            <link rel=\"stylesheet\" href=\"/css/main.css\">\n            <script src=\"/bundle.js\" defer></script>\n            <script>window.__initialData__ = " + __WEBPACK_IMPORTED_MODULE_5_serialize_javascript___default()(initialData) + "</script>\n          </head>\n\n          <body>\n            <div id=\"root\">" + markup + "</div>\n          </body>\n        </html>\n      ");
   }).catch(next);
 });
 
@@ -48657,28 +48579,6 @@ var Home = function (_Component) {
               __self: this
             },
             "Twice a year we invest a small amount of mana in a large number of wizards (recently 105)."
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "p",
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 22
-              },
-              __self: this
-            },
-            "The wizards move to the Highlands of Scotland for 3 months, during which we work intensively with them to get the magic into the best possible shape and refine their pitch to patrons. Each cycle culminates in Demo Day, when the wizards present their magic to a carefully selected, invite-only audience."
-          ),
-          __WEBPACK_IMPORTED_MODULE_0_react___default.a.createElement(
-            "p",
-            {
-              __source: {
-                fileName: _jsxFileName,
-                lineNumber: 28
-              },
-              __self: this
-            },
-            "But WC doesn\u2019t end on Demo Day. We and the WC alumni network continue to help mages for the life of their magic, and beyond."
           )
         )
       );
