@@ -14,7 +14,7 @@ class Home extends Component {
           </p>
         </aside>
         <article>
-          <h1>W Combinator created a new model for funding early stage wizardry.</h1>
+          <h1> Combinator created a new model for funding early stage wizardry.</h1>
           <p>
             Twice a year we invest a small amount of mana in a large number of wizards (recently
             105).
